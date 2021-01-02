@@ -57,3 +57,7 @@ buck-out/
 
 # CocoaPods
 /ios/Pods/
+
+# api keys
+.env  
+google_api_key
