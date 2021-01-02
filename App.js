@@ -1,10 +1,16 @@
 import React, {Component} from 'react';
-import {TextInput, StyleSheet, View, Text} from 'react-native';
-import MapView from 'react-native-maps';
+import {
+  TextInput,
+  StyleSheet,
+  View,
+  Keyboard,
+  Text,
+  TouchableHighlight,
+} from 'react-native';
+import MapView, {Polyline, Marker} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import apiKey from './google_api_key';
-import _ from 'lodash';
-import io from 'socket.io-client';
+import PolyLine from '@mapbox/polyline';
 
 export default class App extends Component {
   constructor(props) {
@@ -15,6 +21,7 @@ export default class App extends Component {
       error: null,
       destination: '',
       predictions: [],
+      pointCoords: [],
     };
   }
 
@@ -26,10 +33,36 @@ export default class App extends Component {
           longitude: position.coords.longitude,
           error: null,
         });
+        this.getRouteDirections();
       },
       (error) => this.setState({error: error.message}),
       {enableHighAccuracy: true, timeout: 20000, maximumAge: 2000},
     );
+  }
+
+  async getRouteDirections(placeId, destinationName) {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/directions/json?origin=${this.state.latitude},${this.state.longitude}&destination=place_id:${placeId}&key=${apiKey}`,
+      );
+      const json = await response.json();
+      console.log(json);
+      const points = PolyLine.decode(json.routes[0].overview_polyline.points);
+      const pointCoords = points.map((point) => {
+        return {latitude: point[0], longitude: point[1]};
+      });
+      this.setState({
+        pointCoords,
+        predictions: [],
+        destination: destinationName,
+      });
+      Keyboard.dismiss();
+      this.map.fitToCoordinates(pointCoords, {
+        edgePadding: {top: 20, bottom: 20, left: 80, right: 80},
+      });
+    } catch (err) {
+      console.log('Lol', err);
+    }
   }
 
   async onChangeDestination(destination) {
@@ -48,15 +81,35 @@ export default class App extends Component {
   }
 
   render() {
+    let marker = null;
+    if (this.state.pointCoords.length > 1) {
+      marker = (
+        <Marker
+          coordinate={this.state.pointCoords[this.state.pointCoords.length - 1]}
+        />
+      );
+    }
     const predictions = this.state.predictions.map((prediction) => (
-      <Text style={styles.suggestions} key={prediction.id}>
-        {prediction.description}
-      </Text>
+      <TouchableHighlight
+        onPress={() =>
+          this.getRouteDirections(
+            prediction.place_id,
+            prediction.structured_formatting.main_text,
+          )
+        }
+        key={prediction.place_id}>
+        <View>
+          <Text style={styles.suggestions}>{prediction.description}</Text>
+        </View>
+      </TouchableHighlight>
     ));
 
     return (
       <View style={styles.mapStyle}>
         <MapView
+          ref={(map) => {
+            this.map = map;
+          }}
           style={styles.mapStyle}
           region={{
             latitude: this.state.latitude,
@@ -64,8 +117,15 @@ export default class App extends Component {
             latitudeDelta: 0.015,
             longitudeDelta: 0.0121,
           }}
-          showsUserLocation={true}
-        />
+          showsUserLocation={true}>
+          <Polyline
+            coordinates={this.state.pointCoords}
+            strokeWidth={2}
+            strokeColor="red"
+          />
+          {marker}
+        </MapView>
+
         <TextInput
           placeholder="Enter destination..."
           style={styles.destinationInput}
