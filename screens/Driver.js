@@ -5,12 +5,14 @@ import {
   View,
   Keyboard,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import MapView, {Polyline, Marker} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import apiKey from '../google_api_key';
 import PolyLine from '@mapbox/polyline';
+import {io} from 'socket.io-client';
 
 export default class Driver extends Component {
   constructor(props) {
@@ -19,9 +21,9 @@ export default class Driver extends Component {
       latitude: 0,
       longitude: 0,
       error: null,
-      destination: '',
-      predictions: [],
       pointCoords: [],
+      lookingForPassengers: false,
+      buttonText: 'FIND PASSENGER',
     };
   }
 
@@ -40,7 +42,7 @@ export default class Driver extends Component {
     );
   }
 
-  async getRouteDirections(placeId, destinationName) {
+  async getRouteDirections(placeId) {
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/directions/json?origin=${this.state.latitude},${this.state.longitude}&destination=place_id:${placeId}&key=${apiKey}`,
@@ -54,9 +56,7 @@ export default class Driver extends Component {
       this.setState({
         pointCoords,
         predictions: [],
-        destination: destinationName,
       });
-      Keyboard.dismiss();
       this.map.fitToCoordinates(pointCoords, {
         edgePadding: {top: 20, bottom: 20, left: 80, right: 80},
       });
@@ -65,19 +65,32 @@ export default class Driver extends Component {
     }
   }
 
-  async onChangeDestination(destination) {
-    //call places API
-    this.setState({destination});
-    const apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${destination}&key=${apiKey}&location=${this.state.latitude}, ${this.state.longitude}&radius=2000`;
-    try {
-      const result = await fetch(apiUrl);
-      const json = await result.json();
+  async lookForPassengers() {
+    if (this.state.lookingForPassengers) {
       this.setState({
-        predictions: json.predictions,
+        lookingForPassengers: false,
       });
-    } catch (err) {
-      console.log('L', err);
+      return;
     }
+
+    this.setState({
+      lookingForPassengers: true,
+    });
+
+    const socket = io('http://192.168.0.110:3000/');
+
+    socket.on('connect', () => {
+      socket.emit('lookingForPassengers');
+    });
+
+    socket.on('taxiRequest', (routeResponse) => {
+      console.log('L', routeResponse);
+      this.getRouteDirections(routeResponse.geocoded_waypoints[0].place_id);
+      this.setState({
+        lookingForPassengers: false,
+        buttonText: 'PASSENGER FOUND!',
+      });
+    });
   }
 
   render() {
@@ -89,20 +102,6 @@ export default class Driver extends Component {
         />
       );
     }
-    const predictions = this.state.predictions.map((prediction) => (
-      <TouchableHighlight
-        onPress={() =>
-          this.getRouteDirections(
-            prediction.place_id,
-            prediction.structured_formatting.main_text,
-          )
-        }
-        key={prediction.place_id}>
-        <View>
-          <Text style={styles.suggestions}>{prediction.description}</Text>
-        </View>
-      </TouchableHighlight>
-    ));
 
     return (
       <View style={styles.mapStyle}>
@@ -125,20 +124,39 @@ export default class Driver extends Component {
           />
           {marker}
         </MapView>
-
-        <TextInput
-          placeholder="Enter destination..."
-          style={styles.destinationInput}
-          value={this.state.destination}
-          onChangeText={(destination) => this.onChangeDestination(destination)}
-        />
-        {predictions}
+        <TouchableOpacity
+          onPress={() => this.lookForPassengers()}
+          style={styles.bottomButton}>
+          <View>
+            <Text style={styles.bottomButtonText}>{this.state.buttonText}</Text>
+            {this.state.lookingForPassengers === true ? (
+              <ActivityIndicator
+                animating={this.state.lookingForPassengers}
+                size="large"
+                color="white"
+              />
+            ) : null}
+          </View>
+        </TouchableOpacity>
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  bottomButton: {
+    backgroundColor: 'black',
+    padding: 20,
+    paddingRight: 40,
+    paddingLeft: 40,
+    marginTop: 'auto',
+    margin: 20,
+    alignSelf: 'center',
+  },
+  bottomButtonText: {
+    color: 'white',
+    fontSize: 20,
+  },
   suggestions: {
     backgroundColor: 'white',
     fontSize: 14,

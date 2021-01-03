@@ -6,11 +6,13 @@ import {
   Keyboard,
   Text,
   TouchableHighlight,
+  TouchableOpacity,
 } from 'react-native';
 import MapView, {Polyline, Marker} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import apiKey from '../google_api_key';
 import PolyLine from '@mapbox/polyline';
+import {io} from 'socket.io-client';
 
 export default class Passenger extends Component {
   constructor(props) {
@@ -55,6 +57,7 @@ export default class Passenger extends Component {
         pointCoords,
         predictions: [],
         destination: destinationName,
+        routeResponse: json,
       });
       Keyboard.dismiss();
       this.map.fitToCoordinates(pointCoords, {
@@ -80,13 +83,32 @@ export default class Passenger extends Component {
     }
   }
 
+  async resquestDriver() {
+    const socket = io('http://192.168.0.110:3000/');
+
+    socket.on('connect', () => {
+      console.log('L', 'client connected');
+      //Request a Taxi!
+      socket.emit('taxiRequest', this.state.routeResponse);
+    });
+  }
+
   render() {
     let marker = null;
+    let driverButton = null;
+
     if (this.state.pointCoords.length > 1) {
       marker = (
         <Marker
           coordinate={this.state.pointCoords[this.state.pointCoords.length - 1]}
         />
+      );
+      driverButton = (
+        <TouchableOpacity
+          onPress={() => this.resquestDriver()}
+          style={styles.bottomButton}>
+          <Text style={styles.bottomButtonText}>FIND DRIVER</Text>
+        </TouchableOpacity>
       );
     }
     const predictions = this.state.predictions.map((prediction) => (
@@ -133,12 +155,26 @@ export default class Passenger extends Component {
           onChangeText={(destination) => this.onChangeDestination(destination)}
         />
         {predictions}
+        {driverButton}
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  bottomButton: {
+    backgroundColor: 'black',
+    padding: 20,
+    paddingRight: 40,
+    paddingLeft: 40,
+    marginTop: 'auto',
+    margin: 20,
+    alignSelf: 'center',
+  },
+  bottomButtonText: {
+    color: 'white',
+    fontSize: 20,
+  },
   suggestions: {
     backgroundColor: 'white',
     fontSize: 14,

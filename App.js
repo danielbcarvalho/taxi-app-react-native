@@ -23,12 +23,12 @@ export default class App extends Component {
       <View style={styles.container}>
         <TouchableOpacity
           style={styles.buttons}
-          onPress={() => this.setState({isDriver: true})}>
+          onPress={() => this.setState({isPassenger: true})}>
           <Text style={styles.textButtons}>Passenger</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.buttons}
-          onPress={() => this.setState({isPassenger: true})}>
+          onPress={() => this.setState({isDriver: true})}>
           <Text style={styles.textButtons}>Driver</Text>
         </TouchableOpacity>
       </View>
