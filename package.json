@@ -13,6 +13,7 @@
     "@mapbox/polyline": "^1.1.1",
     "@react-native-community/geolocation": "^2.0.2",
     "lodash": "^4.17.20",
+    "prop-types": "^15.7.2",
     "react": "16.13.1",
     "react-native": "0.63.4",
     "react-native-maps": "^0.27.1",

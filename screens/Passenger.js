@@ -13,6 +13,7 @@ import Geolocation from '@react-native-community/geolocation';
 import apiKey from '../google_api_key';
 import PolyLine from '@mapbox/polyline';
 import {io} from 'socket.io-client';
+import BottomButton from '../components/BottomButton';
 
 export default class Passenger extends Component {
   constructor(props) {
@@ -24,10 +25,13 @@ export default class Passenger extends Component {
       destination: '',
       predictions: [],
       pointCoords: [],
+      routeResponse: {},
+      lookingForDriver: false,
     };
   }
 
   componentDidMount() {
+    //Get current location and set initial region to this
     Geolocation.getCurrentPosition(
       (position) => {
         this.setState({
@@ -70,7 +74,6 @@ export default class Passenger extends Component {
 
   async onChangeDestination(destination) {
     //call places API
-    this.setState({destination});
     const apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${destination}&key=${apiKey}&location=${this.state.latitude}, ${this.state.longitude}&radius=2000`;
     try {
       const result = await fetch(apiUrl);
@@ -84,7 +87,7 @@ export default class Passenger extends Component {
   }
 
   async resquestDriver() {
-    const socket = io('http://192.168.0.110:3000/');
+    const socket = io('http://192.168.0.120:3000/');
 
     socket.on('connect', () => {
       console.log('L', 'client connected');
@@ -95,7 +98,7 @@ export default class Passenger extends Component {
 
   render() {
     let marker = null;
-    let driverButton = null;
+    let getDriver = null;
 
     if (this.state.pointCoords.length > 1) {
       marker = (
@@ -103,12 +106,11 @@ export default class Passenger extends Component {
           coordinate={this.state.pointCoords[this.state.pointCoords.length - 1]}
         />
       );
-      driverButton = (
-        <TouchableOpacity
-          onPress={() => this.resquestDriver()}
-          style={styles.bottomButton}>
-          <Text style={styles.bottomButtonText}>FIND DRIVER</Text>
-        </TouchableOpacity>
+      getDriver = (
+        <BottomButton
+          onPressFunction={() => this.resquestDriver()}
+          buttonText="REQUEST 🚗"
+        />
       );
     }
     const predictions = this.state.predictions.map((prediction) => (
@@ -121,7 +123,9 @@ export default class Passenger extends Component {
         }
         key={prediction.place_id}>
         <View>
-          <Text style={styles.suggestions}>{prediction.description}</Text>
+          <Text style={styles.suggestions}>
+            {prediction.structured_formatting.main_text}
+          </Text>
         </View>
       </TouchableHighlight>
     ));
@@ -152,10 +156,14 @@ export default class Passenger extends Component {
           placeholder="Enter destination..."
           style={styles.destinationInput}
           value={this.state.destination}
-          onChangeText={(destination) => this.onChangeDestination(destination)}
+          clearButtonMode="always"
+          onChangeText={(destination) => {
+            this.setState({destination, pointCoords: []});
+            this.onChangeDestination(destination);
+          }}
         />
         {predictions}
-        {driverButton}
+        {getDriver}
       </View>
     );
   }

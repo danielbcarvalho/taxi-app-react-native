@@ -1,15 +1,15 @@
 import React, {Component} from 'react';
 import {
-  TextInput,
   StyleSheet,
   View,
-  Keyboard,
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import MapView, {Polyline, Marker} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
+import BottomButton from '../components/BottomButton';
 import apiKey from '../google_api_key';
 import PolyLine from '@mapbox/polyline';
 import {io} from 'socket.io-client';
@@ -28,6 +28,8 @@ export default class Driver extends Component {
   }
 
   componentDidMount() {
+    //Get current location and set initial region to this
+
     Geolocation.getCurrentPosition(
       (position) => {
         this.setState({
@@ -55,7 +57,7 @@ export default class Driver extends Component {
       });
       this.setState({
         pointCoords,
-        predictions: [],
+        routeResponse: json,
       });
       this.map.fitToCoordinates(pointCoords, {
         edgePadding: {top: 20, bottom: 20, left: 80, right: 80},
@@ -77,7 +79,7 @@ export default class Driver extends Component {
       lookingForPassengers: true,
     });
 
-    const socket = io('http://192.168.0.110:3000/');
+    const socket = io('http://192.168.0.120:3000/');
 
     socket.on('connect', () => {
       socket.emit('lookingForPassengers');
@@ -88,18 +90,44 @@ export default class Driver extends Component {
       this.getRouteDirections(routeResponse.geocoded_waypoints[0].place_id);
       this.setState({
         lookingForPassengers: false,
+        passengerFound: true,
         buttonText: 'PASSENGER FOUND!',
       });
     });
   }
 
   render() {
-    let marker = null;
-    if (this.state.pointCoords.length > 1) {
-      marker = (
-        <Marker
-          coordinate={this.state.pointCoords[this.state.pointCoords.length - 1]}
+    let endMarker = null;
+    let startMarker = null;
+    let findingPassengerActIndicator = null;
+    let passengerSearchText = 'FIND PASSENGER';
+
+    if (this.state.lookingForPassengers) {
+      passengerSearchText = 'FINDING PASSENGERS...';
+      findingPassengerActIndicator = (
+        <ActivityIndicator
+          size="large"
+          animating={this.state.lookingForPassengers}
+          color="white"
         />
+      );
+    }
+
+    if (this.state.passengerFound) {
+      passengerSearchText = 'FOUND PASSENGER! ACCEPT RIDE?';
+    }
+
+    if (this.state.pointCoords.length > 1) {
+      endMarker = (
+        <Marker
+          coordinate={
+            this.state.pointCoords[this.state.pointCoords.length - 1]
+          }>
+          <Image
+            style={{width: 40, height: 40}}
+            source={require('../images/person-marker.png')}
+          />
+        </Marker>
       );
     }
 
@@ -122,22 +150,17 @@ export default class Driver extends Component {
             strokeWidth={2}
             strokeColor="red"
           />
-          {marker}
+          {endMarker}
+          {startMarker}
         </MapView>
-        <TouchableOpacity
-          onPress={() => this.lookForPassengers()}
-          style={styles.bottomButton}>
-          <View>
-            <Text style={styles.bottomButtonText}>{this.state.buttonText}</Text>
-            {this.state.lookingForPassengers === true ? (
-              <ActivityIndicator
-                animating={this.state.lookingForPassengers}
-                size="large"
-                color="white"
-              />
-            ) : null}
-          </View>
-        </TouchableOpacity>
+
+        <BottomButton
+          onPressFunction={() => {
+            this.lookForPassengers();
+          }}
+          buttonText={passengerSearchText}>
+          {findingPassengerActIndicator}
+        </BottomButton>
       </View>
     );
   }
