@@ -25,6 +25,9 @@ export default class Driver extends Component {
       lookingForPassengers: false,
       buttonText: 'FIND PASSENGER',
     };
+    this.lookForPassengers = this.lookForPassengers.bind(this);
+    this.acceptPassengerRequest = this.acceptPassengerRequest.bind(this);
+    this.socket = null;
   }
 
   componentDidMount() {
@@ -79,13 +82,13 @@ export default class Driver extends Component {
       lookingForPassengers: true,
     });
 
-    const socket = io('http://192.168.0.120:3000/');
+    this.socket = io('http://192.168.10.101:3000/');
 
-    socket.on('connect', () => {
-      socket.emit('lookingForPassengers');
+    this.socket.on('connect', () => {
+      this.socket.emit('lookingForPassengers');
     });
 
-    socket.on('taxiRequest', (routeResponse) => {
+    this.socket.on('taxiRequest', (routeResponse) => {
       console.log('L', routeResponse);
       this.getRouteDirections(routeResponse.geocoded_waypoints[0].place_id);
       this.setState({
@@ -96,11 +99,25 @@ export default class Driver extends Component {
     });
   }
 
+  acceptPassengerRequest() {
+    //send driver location to passenger
+    //console.log(this.state.routeResponse, 'send location');
+    this.setState({
+      lookingForPassengers: false,
+    });
+    this.socket.emit('acceptedRide', {
+      latitude: this.state.latitude,
+      longitude: this.state.longitude,
+    });
+    //this.socket.emit('acceptedRide', this.state.routeResponse);
+  }
+
   render() {
     let endMarker = null;
     let startMarker = null;
     let findingPassengerActIndicator = null;
     let passengerSearchText = 'FIND PASSENGER';
+    let bottomButtonFunction = this.lookForPassengers;
 
     if (this.state.lookingForPassengers) {
       passengerSearchText = 'FINDING PASSENGERS...';
@@ -115,6 +132,7 @@ export default class Driver extends Component {
 
     if (this.state.passengerFound) {
       passengerSearchText = 'FOUND PASSENGER! ACCEPT RIDE?';
+      bottomButtonFunction = this.acceptPassengerRequest;
     }
 
     if (this.state.pointCoords.length > 1) {
@@ -155,9 +173,7 @@ export default class Driver extends Component {
         </MapView>
 
         <BottomButton
-          onPressFunction={() => {
-            this.lookForPassengers();
-          }}
+          onPressFunction={bottomButtonFunction}
           buttonText={passengerSearchText}>
           {findingPassengerActIndicator}
         </BottomButton>

@@ -6,7 +6,7 @@ import {
   Keyboard,
   Text,
   TouchableHighlight,
-  TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import MapView, {Polyline, Marker} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
@@ -27,6 +27,7 @@ export default class Passenger extends Component {
       pointCoords: [],
       routeResponse: {},
       lookingForDriver: false,
+      buttonText: 'REQUEST 🚗',
     };
   }
 
@@ -87,18 +88,43 @@ export default class Passenger extends Component {
   }
 
   async resquestDriver() {
-    const socket = io('http://192.168.0.120:3000/');
+    const socket = io('http://192.168.10.101:3000/');
 
     socket.on('connect', () => {
       console.log('L', 'client connected');
       //Request a Taxi!
       socket.emit('taxiRequest', this.state.routeResponse);
     });
+
+    this.setState({lookingForDriver: true});
+
+    socket.on('acceptedRide', (driverLocation) => {
+      console.log('driver location!!!!!!!!!!!!!!!!', driverLocation);
+      this.getRouteDirections(driverLocation.geocoded_waypoints[1].place_id);
+      this.setState({
+        buttonText: 'TAXI ACCEPTED THE RIDE!',
+        lookingForDriver: false,
+      });
+      this.map.fitToCoordinates(driverLocation, {
+        edgePadding: {top: 20, bottom: 20, left: 80, right: 80},
+      });
+    });
   }
 
   render() {
     let marker = null;
     let getDriver = null;
+    let findingDriverActIndicator = null;
+
+    if (this.state.lookingForDriver) {
+      findingDriverActIndicator = (
+        <ActivityIndicator
+          size="large"
+          animating={this.state.lookingForDriver}
+          color="white"
+        />
+      );
+    }
 
     if (this.state.pointCoords.length > 1) {
       marker = (
@@ -109,8 +135,9 @@ export default class Passenger extends Component {
       getDriver = (
         <BottomButton
           onPressFunction={() => this.resquestDriver()}
-          buttonText="REQUEST 🚗"
-        />
+          buttonText={this.state.buttonText}>
+          {findingDriverActIndicator}
+        </BottomButton>
       );
     }
     const predictions = this.state.predictions.map((prediction) => (
