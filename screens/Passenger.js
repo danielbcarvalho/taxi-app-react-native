@@ -7,6 +7,7 @@ import {
   Text,
   TouchableHighlight,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import MapView, {Polyline, Marker} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
@@ -28,6 +29,7 @@ export default class Passenger extends Component {
       routeResponse: {},
       lookingForDriver: false,
       buttonText: 'REQUEST 🚗',
+      driverIsOnTheWar: false,
     };
   }
 
@@ -99,14 +101,17 @@ export default class Passenger extends Component {
     this.setState({lookingForDriver: true});
 
     socket.on('acceptedRide', (driverLocation) => {
-      console.log('driver location!!!!!!!!!!!!!!!!', driverLocation);
-      this.getRouteDirections(driverLocation.geocoded_waypoints[1].place_id);
+      let pointCoords = [...this.state.pointCoords, driverLocation];
+
+      this.map.fitToCoordinates(pointCoords, {
+        edgePadding: {top: 40, bottom: 40, left: 40, right: 40},
+      });
+      //this.getRouteDirections(driverLocation.geocoded_waypoints[0].place_id);
       this.setState({
         buttonText: 'TAXI ACCEPTED THE RIDE!',
         lookingForDriver: false,
-      });
-      this.map.fitToCoordinates(driverLocation, {
-        edgePadding: {top: 20, bottom: 20, left: 80, right: 80},
+        driverIsOnTheWar: true,
+        driverLocation: driverLocation,
       });
     });
   }
@@ -115,6 +120,18 @@ export default class Passenger extends Component {
     let marker = null;
     let getDriver = null;
     let findingDriverActIndicator = null;
+    let driverMarker = null;
+
+    if (this.state.driverIsOnTheWar) {
+      driverMarker = (
+        <Marker coordinate={this.state.driverLocation}>
+          <Image
+            source={require('../images/carIcon.png')}
+            style={{width: 40, height: 40}}
+          />
+        </Marker>
+      );
+    }
 
     if (this.state.lookingForDriver) {
       findingDriverActIndicator = (
@@ -164,7 +181,7 @@ export default class Passenger extends Component {
             this.map = map;
           }}
           style={styles.mapStyle}
-          region={{
+          initialRegion={{
             latitude: this.state.latitude,
             longitude: this.state.longitude,
             latitudeDelta: 0.015,
@@ -177,6 +194,7 @@ export default class Passenger extends Component {
             strokeColor="red"
           />
           {marker}
+          {driverMarker}
         </MapView>
 
         <TextInput
