@@ -42,7 +42,7 @@ export default class Passenger extends Component {
           longitude: position.coords.longitude,
           error: null,
         });
-        this.getRouteDirections();
+        //this.getRouteDirections();
       },
       (error) => this.setState({error: error.message}),
       {enableHighAccuracy: true, timeout: 20000, maximumAge: 2000},
@@ -159,12 +159,13 @@ export default class Passenger extends Component {
     }
     const predictions = this.state.predictions.map((prediction) => (
       <TouchableHighlight
-        onPress={() =>
+        onPress={() => {
+          console.log('L', 'Onpress');
           this.getRouteDirections(
             prediction.place_id,
             prediction.structured_formatting.main_text,
-          )
-        }
+          );
+        }}
         key={prediction.place_id}>
         <View>
           <Text style={styles.suggestions}>

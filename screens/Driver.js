@@ -2,10 +2,10 @@ import React, {Component} from 'react';
 import {
   StyleSheet,
   View,
-  Text,
-  TouchableOpacity,
   ActivityIndicator,
   Image,
+  Linking,
+  Platform,
 } from 'react-native';
 import MapView, {Polyline, Marker} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
@@ -101,7 +101,6 @@ export default class Driver extends Component {
 
   acceptPassengerRequest() {
     //send driver location to passenger
-    //console.log(this.state.routeResponse, 'send location');
     this.setState({
       lookingForPassengers: false,
     });
@@ -109,7 +108,20 @@ export default class Driver extends Component {
       latitude: this.state.latitude,
       longitude: this.state.longitude,
     });
-    //this.socket.emit('acceptedRide', this.state.routeResponse);
+
+    const passengerLocation = this.state.pointCoords[
+      this.state.pointCoords.length - 1
+    ];
+
+    if (Platform.OS === 'ios') {
+      Linking.openURL(
+        `http://maps.aple.com/?daddr=${passengerLocation.latitude},${passengerLocation.longitude}`,
+      );
+    } else {
+      Linking.openURL(
+        `http://www.google.com/dir/?api=1&destination=${passengerLocation.latitude},${passengerLocation.longitude}`,
+      );
+    }
   }
 
   render() {
