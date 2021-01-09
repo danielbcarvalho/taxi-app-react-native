@@ -101,12 +101,13 @@ export default class Passenger extends Component {
     this.setState({lookingForDriver: true});
 
     socket.on('acceptedRide', (driverLocation) => {
+      console.log('L', driverLocation);
       let pointCoords = [...this.state.pointCoords, driverLocation];
 
       this.map.fitToCoordinates(pointCoords, {
         edgePadding: {top: 40, bottom: 40, left: 40, right: 40},
       });
-      //this.getRouteDirections(driverLocation.geocoded_waypoints[0].place_id);
+      //this.getRouteDirections(routeResponse.geocoded_waypoints[0].place_id);
       this.setState({
         buttonText: 'TAXI ACCEPTED THE RIDE!',
         lookingForDriver: false,

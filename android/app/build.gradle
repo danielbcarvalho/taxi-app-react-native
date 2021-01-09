@@ -190,6 +190,8 @@ android {
 }
 
 dependencies {
+    implementation project(':@mauron85_react-native-background-geolocation')
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules

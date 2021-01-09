@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@mapbox/polyline": "^1.1.1",
+    "@mauron85/react-native-background-geolocation": "^0.6.3",
     "@react-native-community/geolocation": "^2.0.2",
     "lodash": "^4.17.20",
     "prop-types": "^15.7.2",

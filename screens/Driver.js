@@ -6,6 +6,7 @@ import {
   Image,
   Linking,
   Platform,
+  Alert,
 } from 'react-native';
 import MapView, {Polyline, Marker} from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
@@ -13,6 +14,7 @@ import BottomButton from '../components/BottomButton';
 import apiKey from '../google_api_key';
 import PolyLine from '@mapbox/polyline';
 import {io} from 'socket.io-client';
+import BackgroundGeolocation from '@mauron85/react-native-background-geolocation';
 
 export default class Driver extends Component {
   constructor(props) {
@@ -45,6 +47,48 @@ export default class Driver extends Component {
       (error) => this.setState({error: error.message}),
       {enableHighAccuracy: true, timeout: 20000, maximumAge: 2000},
     );
+    BackgroundGeolocation.configure({
+      desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
+      stationaryRadius: 50,
+      distanceFilter: 50,
+      debug: false,
+      startOnBoot: false,
+      stopOnTerminate: true,
+      locationProvider: BackgroundGeolocation.ACTIVITY_PROVIDER,
+      interval: 10000,
+      fastestInterval: 5000,
+      activitiesInterval: 10000,
+      stopOnStillActivity: false,
+    });
+
+    BackgroundGeolocation.on('authorization', (status) => {
+      console.log(
+        '[INFO] BackgroundGeolocation authorization status: ' + status,
+      );
+      if (status !== BackgroundGeolocation.AUTHORIZED) {
+        // we need to set delay or otherwise alert may not be shown
+        setTimeout(
+          () =>
+            Alert.alert(
+              'App requires location tracking permission',
+              'Would you like to open app settings?',
+              [
+                {
+                  text: 'Yes',
+                  onPress: () => BackgroundGeolocation.showAppSettings(),
+                },
+                {
+                  text: 'No',
+                  onPress: () => console.log('No Pressed'),
+                  style: 'cancel',
+                },
+                ,
+              ],
+            ),
+          1000,
+        );
+      }
+    });
   }
 
   async getRouteDirections(placeId) {
@@ -100,18 +144,28 @@ export default class Driver extends Component {
   }
 
   acceptPassengerRequest() {
-    //send driver location to passenger
     this.setState({
       lookingForPassengers: false,
-    });
-    this.socket.emit('acceptedRide', {
-      latitude: this.state.latitude,
-      longitude: this.state.longitude,
     });
 
     const passengerLocation = this.state.pointCoords[
       this.state.pointCoords.length - 1
     ];
+
+    BackgroundGeolocation.on('location', (location) => {
+      //Send driver location to paseenger socket io backend
+      this.socket.emit('acceptedRide', {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+    });
+
+    BackgroundGeolocation.checkStatus((status) => {
+      // you don't need to check status before start (this is just the example)
+      if (!status.isRunning) {
+        BackgroundGeolocation.start(); //triggers start on start event
+      }
+    });
 
     if (Platform.OS === 'ios') {
       Linking.openURL(
@@ -119,7 +173,7 @@ export default class Driver extends Component {
       );
     } else {
       Linking.openURL(
-        `http://www.google.com/dir/?api=1&destination=${passengerLocation.latitude},${passengerLocation.longitude}`,
+        `https://www.google.com/maps/dir/?api=1&destination=${passengerLocation.latitude},${passengerLocation.longitude}`,
       );
     }
   }
