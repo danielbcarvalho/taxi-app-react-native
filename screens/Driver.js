@@ -169,7 +169,7 @@ export default class Driver extends Component {
 
     if (Platform.OS === 'ios') {
       Linking.openURL(
-        `http://maps.aple.com/?daddr=${passengerLocation.latitude},${passengerLocation.longitude}`,
+        `http://maps.apple.com/?daddr=${passengerLocation.latitude},${passengerLocation.longitude}`,
       );
     } else {
       Linking.openURL(

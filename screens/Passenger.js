@@ -50,6 +50,7 @@ export default class Passenger extends Component {
   }
 
   async getRouteDirections(placeId, destinationName) {
+    console.log('grd->', placeId, destinationName);
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/directions/json?origin=${this.state.latitude},${this.state.longitude}&destination=place_id:${placeId}&key=${apiKey}`,
@@ -70,8 +71,9 @@ export default class Passenger extends Component {
       this.map.fitToCoordinates(pointCoords, {
         edgePadding: {top: 20, bottom: 20, left: 80, right: 80},
       });
+      console.log('gdd', this.state.latitude);
     } catch (err) {
-      console.log('Lol', err);
+      console.log('Lol', this.state.latitude, this.state.longitude);
     }
   }
 
@@ -179,11 +181,11 @@ export default class Passenger extends Component {
     return (
       <View style={styles.mapStyle}>
         <MapView
+          style={styles.mapStyle}
           ref={(map) => {
             this.map = map;
           }}
-          style={styles.mapStyle}
-          initialRegion={{
+          region={{
             latitude: this.state.latitude,
             longitude: this.state.longitude,
             latitudeDelta: 0.015,
