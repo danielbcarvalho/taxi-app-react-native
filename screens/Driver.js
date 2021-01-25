@@ -126,7 +126,7 @@ export default class Driver extends Component {
       lookingForPassengers: true,
     });
 
-    this.socket = io('http://192.168.10.101:3000/');
+    this.socket = io('http://192.168.0.111:3000/');
 
     this.socket.on('connect', () => {
       this.socket.emit('lookingForPassengers');
@@ -144,17 +144,18 @@ export default class Driver extends Component {
   }
 
   acceptPassengerRequest() {
-    this.setState({
-      lookingForPassengers: false,
-    });
-
     const passengerLocation = this.state.pointCoords[
       this.state.pointCoords.length - 1
     ];
 
+    // this.setState({
+    //   lookingForPassengers: false,
+    // });
+
     BackgroundGeolocation.on('location', (location) => {
       //Send driver location to paseenger socket io backend
-      this.socket.emit('acceptedRide', {
+      console.log('bgr acceptedride', location.latitude);
+      this.socket.emit('driverLocation', {
         latitude: location.latitude,
         longitude: location.longitude,
       });
@@ -163,13 +164,14 @@ export default class Driver extends Component {
     BackgroundGeolocation.checkStatus((status) => {
       // you don't need to check status before start (this is just the example)
       if (!status.isRunning) {
+        console.log('start', status.isRunning);
         BackgroundGeolocation.start(); //triggers start on start event
       }
     });
 
     if (Platform.OS === 'ios') {
       Linking.openURL(
-        `http://maps.aple.com/?daddr=${passengerLocation.latitude},${passengerLocation.longitude}`,
+        `http://maps.apple.com/?daddr=${passengerLocation.latitude},${passengerLocation.longitude}`,
       );
     } else {
       Linking.openURL(
@@ -222,7 +224,7 @@ export default class Driver extends Component {
             this.map = map;
           }}
           style={styles.mapStyle}
-          region={{
+          inicialRegion={{
             latitude: this.state.latitude,
             longitude: this.state.longitude,
             latitudeDelta: 0.015,
