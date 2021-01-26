@@ -35,13 +35,13 @@ export default class Passenger extends Component {
 
   componentDidMount() {
     //Get current location and set initial region to this
-    const watchId = Geolocation.watchPosition(
+    this.watchId = Geolocation.watchPosition(
       (position) => {
         this.setState({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         });
-        this.getRouteDirections();
+        //  this.getRouteDirections();
       },
       (error) => console.error(error),
       {enableHighAccuracy: true, timeout: 20000, maximumAge: 2000},
@@ -58,7 +58,7 @@ export default class Passenger extends Component {
         `https://maps.googleapis.com/maps/api/directions/json?origin=${this.state.latitude},${this.state.longitude}&destination=place_id:${placeId}&key=${apiKey}`,
       );
       const json = await response.json();
-      console.log(json);
+      console.log('json getroutedirection', json);
       const points = PolyLine.decode(json.routes[0].overview_polyline.points);
       const pointCoords = points.map((point) => {
         return {latitude: point[0], longitude: point[1]};
@@ -75,6 +75,7 @@ export default class Passenger extends Component {
       });
     } catch (err) {
       console.log('Lol', err);
+      console.log('passenger json getroutedirection', placeId, destinationName);
     }
   }
 
@@ -95,7 +96,7 @@ export default class Passenger extends Component {
   async resquestDriver() {
     this.setState({lookingForDriver: true});
 
-    const socket = io('http://192.168.0.111:3000/');
+    const socket = io('http://192.168.10.102:3000/');
 
     socket.on('connect', () => {
       console.log('L', 'client connected');
@@ -112,7 +113,7 @@ export default class Passenger extends Component {
       //this.getRouteDirections(routeResponse.geocoded_waypoints[0].place_id);
       this.setState({
         buttonText: 'TAXI ACCEPTED THE RIDE!',
-        lookingForDriver: false,
+        //lookingForDriver: false,
         driverIsOnTheWar: true,
         driverLocation,
       });
@@ -189,7 +190,7 @@ export default class Passenger extends Component {
             this.map = map;
           }}
           style={styles.mapStyle}
-          inicialRegion={{
+          initialRegion={{
             latitude: this.state.latitude,
             longitude: this.state.longitude,
             latitudeDelta: 0.015,

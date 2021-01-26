@@ -20,9 +20,8 @@ export default class Driver extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      latitude: 0,
-      longitude: 0,
-      error: null,
+      latitude: null,
+      longitude: null,
       pointCoords: [],
       lookingForPassengers: false,
       buttonText: 'FIND PASSENGER',
@@ -32,19 +31,22 @@ export default class Driver extends Component {
     this.socket = null;
   }
 
+  componentWillUnmount() {
+    Geolocation.clearWatch(this.watchId);
+  }
+
   componentDidMount() {
     //Get current location and set initial region to this
-
-    Geolocation.getCurrentPosition(
+    this.watchId = Geolocation.watchPosition(
       (position) => {
         this.setState({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
           error: null,
         });
-        this.getRouteDirections();
+        // this.getRouteDirections();
       },
-      (error) => this.setState({error: error.message}),
+      (error) => console.log(error),
       {enableHighAccuracy: true, timeout: 20000, maximumAge: 2000},
     );
     BackgroundGeolocation.configure({
@@ -97,7 +99,7 @@ export default class Driver extends Component {
         `https://maps.googleapis.com/maps/api/directions/json?origin=${this.state.latitude},${this.state.longitude}&destination=place_id:${placeId}&key=${apiKey}`,
       );
       const json = await response.json();
-      console.log(json);
+      console.log('json driver routedir', json);
       const points = PolyLine.decode(json.routes[0].overview_polyline.points);
       const pointCoords = points.map((point) => {
         return {latitude: point[0], longitude: point[1]};
@@ -111,6 +113,7 @@ export default class Driver extends Component {
       });
     } catch (err) {
       console.log('Lol', err);
+      console.log('driver', placeId);
     }
   }
 
@@ -126,7 +129,7 @@ export default class Driver extends Component {
       lookingForPassengers: true,
     });
 
-    this.socket = io('http://192.168.0.111:3000/');
+    this.socket = io('http://192.168.10.102:3000/');
 
     this.socket.on('connect', () => {
       this.socket.emit('lookingForPassengers');
@@ -187,6 +190,10 @@ export default class Driver extends Component {
     let passengerSearchText = 'FIND PASSENGER';
     let bottomButtonFunction = this.lookForPassengers;
 
+    if (this.state.latitude === null) {
+      return null;
+    }
+
     if (this.state.lookingForPassengers) {
       passengerSearchText = 'FINDING PASSENGERS...';
       findingPassengerActIndicator = (
@@ -224,7 +231,7 @@ export default class Driver extends Component {
             this.map = map;
           }}
           style={styles.mapStyle}
-          inicialRegion={{
+          initialRegion={{
             latitude: this.state.latitude,
             longitude: this.state.longitude,
             latitudeDelta: 0.015,
