@@ -3,16 +3,14 @@ import {
   TextInput,
   StyleSheet,
   View,
-  Keyboard,
   Text,
   TouchableHighlight,
   ActivityIndicator,
   Image,
+  Keyboard,
 } from 'react-native';
 import MapView, {Polyline, Marker} from 'react-native-maps';
-import Geolocation from '@react-native-community/geolocation';
 import apiKey from '../google_api_key';
-import PolyLine from '@mapbox/polyline';
 import {io} from 'socket.io-client';
 import BottomButton from '../components/BottomButton';
 
@@ -20,68 +18,16 @@ export default class Passenger extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      latitude: null,
-      longitude: null,
-      error: null,
-      destination: '',
-      predictions: [],
-      pointCoords: [],
-      routeResponse: {},
       lookingForDriver: false,
       buttonText: 'REQUEST 🚗',
       driverIsOnTheWar: false,
+      predictions: [],
     };
-  }
-
-  componentDidMount() {
-    //Get current location and set initial region to this
-    this.watchId = Geolocation.watchPosition(
-      (position) => {
-        this.setState({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-        //  this.getRouteDirections();
-      },
-      (error) => console.error(error),
-      {enableHighAccuracy: true, timeout: 20000, maximumAge: 2000},
-    );
-  }
-
-  componentWillUnmount() {
-    Geolocation.clearWatch(this.watchId);
-  }
-
-  async getRouteDirections(placeId, destinationName) {
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${this.state.latitude},${this.state.longitude}&destination=place_id:${placeId}&key=${apiKey}`,
-      );
-      const json = await response.json();
-      console.log('json getroutedirection', json);
-      const points = PolyLine.decode(json.routes[0].overview_polyline.points);
-      const pointCoords = points.map((point) => {
-        return {latitude: point[0], longitude: point[1]};
-      });
-      this.setState({
-        pointCoords,
-        predictions: [],
-        destination: destinationName,
-        routeResponse: json,
-      });
-      Keyboard.dismiss();
-      this.map.fitToCoordinates(pointCoords, {
-        edgePadding: {top: 20, bottom: 20, left: 80, right: 80},
-      });
-    } catch (err) {
-      console.log('Lol', err);
-      console.log('passenger json getroutedirection', placeId, destinationName);
-    }
   }
 
   async onChangeDestination(destination) {
     //call places API
-    const apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${destination}&key=${apiKey}&location=${this.state.latitude}, ${this.state.longitude}&radius=2000`;
+    const apiUrl = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${destination}&key=${apiKey}&location=${this.props.latitude}, ${this.props.longitude}&radius=2000`;
     try {
       const result = await fetch(apiUrl);
       const json = await result.json();
@@ -96,16 +42,16 @@ export default class Passenger extends Component {
   async resquestDriver() {
     this.setState({lookingForDriver: true});
 
-    const socket = io('http://192.168.10.102:3000/');
+    const socket = io('http://192.168.0.100:3000/');
 
     socket.on('connect', () => {
       console.log('L', 'client connected');
       //Request a Taxi!
-      socket.emit('taxiRequest', this.state.routeResponse);
+      socket.emit('taxiRequest', this.props.routeResponse);
     });
 
     socket.on('driverLocation', (driverLocation) => {
-      const pointCoords = [...this.state.pointCoords, driverLocation];
+      const pointCoords = [...this.props.pointCoords, driverLocation];
 
       this.map.fitToCoordinates(pointCoords, {
         edgePadding: {top: 40, bottom: 20, left: 20, right: 20},
@@ -126,7 +72,7 @@ export default class Passenger extends Component {
     let findingDriverActIndicator = null;
     let driverMarker = null;
 
-    if (this.state.latitude === null) {
+    if (this.props.latitude === null) {
       return null;
     }
 
@@ -151,10 +97,10 @@ export default class Passenger extends Component {
       );
     }
 
-    if (this.state.pointCoords.length > 1) {
+    if (this.props.pointCoords.length > 1) {
       marker = (
         <Marker
-          coordinate={this.state.pointCoords[this.state.pointCoords.length - 1]}
+          coordinate={this.props.pointCoords[this.props.pointCoords.length - 1]}
         />
       );
       getDriver = (
@@ -167,12 +113,15 @@ export default class Passenger extends Component {
     }
     const predictions = this.state.predictions.map((prediction) => (
       <TouchableHighlight
-        onPress={() => {
-          console.log('L', 'Onpress');
-          this.getRouteDirections(
+        onPress={async () => {
+          const destinationName = await this.props.getRouteDirections(
             prediction.place_id,
             prediction.structured_formatting.main_text,
           );
+          this.setState({predictions: [], destination: destinationName});
+          this.map.fitToCoordinates(this.props.pointCoords, {
+            edgePadding: {top: 20, bottom: 20, left: 80, right: 80},
+          });
         }}
         key={prediction.place_id}>
         <View>
@@ -191,14 +140,14 @@ export default class Passenger extends Component {
           }}
           style={styles.mapStyle}
           initialRegion={{
-            latitude: this.state.latitude,
-            longitude: this.state.longitude,
+            latitude: this.props.latitude,
+            longitude: this.props.longitude,
             latitudeDelta: 0.015,
             longitudeDelta: 0.0121,
           }}
           showsUserLocation={true}>
           <Polyline
-            coordinates={this.state.pointCoords}
+            coordinates={this.props.pointCoords}
             strokeWidth={2}
             strokeColor="red"
           />
@@ -212,7 +161,8 @@ export default class Passenger extends Component {
           value={this.state.destination}
           clearButtonMode="always"
           onChangeText={(destination) => {
-            this.setState({destination, pointCoords: []});
+            this.props.destination = destination;
+            //this.setState({destination});
             this.onChangeDestination(destination);
           }}
         />

@@ -2,6 +2,15 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:../../../../Downloads/testrouteIOS.gpx">
+   </FileRef>
+   <FileRef
+      location = "group:../../../../Downloads/testrouteIOS.gpx">
+   </FileRef>
+   <FileRef
+      location = "group:../../../../Downloads/testrouteIOS.gpx">
+   </FileRef>
+   <FileRef
       location = "group:uber_app.xcodeproj">
    </FileRef>
    <FileRef
