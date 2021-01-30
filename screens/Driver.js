@@ -82,7 +82,7 @@ export default class Driver extends Component {
       lookingForPassengers: true,
     });
 
-    this.socket = io('http://192.168.0.100:3000/');
+    this.socket = io('http://192.168.10.101:3000/');
 
     this.socket.on('connect', () => {
       this.socket.emit('lookingForPassengers');
@@ -108,11 +108,30 @@ export default class Driver extends Component {
     const passengerLocation = this.props.pointCoords[
       this.props.pointCoords.length - 1
     ];
+    console.log('acceppassen', passengerLocation);
 
     // this.setState({
     //   lookingForPassengers: false,
     // });
+    BackgroundGeolocation.checkStatus((status) => {
+      console.log(
+        '[INFO] BackgroundGeolocation service is running',
+        status.isRunning,
+      );
+      console.log(
+        '[INFO] BackgroundGeolocation services enabled',
+        status.locationServicesEnabled,
+      );
+      console.log(
+        '[INFO] BackgroundGeolocation auth status: ' + status.authorization,
+      );
 
+      // you don't need to check status before start (this is just the example)
+      if (!status.isRunning) {
+        console.log('start', status.isRunning);
+        BackgroundGeolocation.start(); //triggers start on start event
+      }
+    });
     BackgroundGeolocation.on('location', (location) => {
       //Send driver location to paseenger socket io backend
       console.log('bgr acceptedride', location.latitude);
@@ -120,14 +139,6 @@ export default class Driver extends Component {
         latitude: location.latitude,
         longitude: location.longitude,
       });
-    });
-
-    BackgroundGeolocation.checkStatus((status) => {
-      // you don't need to check status before start (this is just the example)
-      if (!status.isRunning) {
-        console.log('start', status.isRunning);
-        BackgroundGeolocation.start(); //triggers start on start event
-      }
     });
 
     if (Platform.OS === 'ios') {

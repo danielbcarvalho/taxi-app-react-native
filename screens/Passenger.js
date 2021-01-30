@@ -7,7 +7,6 @@ import {
   TouchableHighlight,
   ActivityIndicator,
   Image,
-  Keyboard,
 } from 'react-native';
 import MapView, {Polyline, Marker} from 'react-native-maps';
 import apiKey from '../google_api_key';
@@ -42,7 +41,7 @@ export default class Passenger extends Component {
   async resquestDriver() {
     this.setState({lookingForDriver: true});
 
-    const socket = io('http://192.168.0.100:3000/');
+    const socket = io('http://192.168.10.101:3000/');
 
     socket.on('connect', () => {
       console.log('L', 'client connected');
@@ -52,7 +51,8 @@ export default class Passenger extends Component {
 
     socket.on('driverLocation', (driverLocation) => {
       const pointCoords = [...this.props.pointCoords, driverLocation];
-
+      console.log('socketon driverlocation', pointCoords);
+      console.log('driverLoc', driverLocation);
       this.map.fitToCoordinates(pointCoords, {
         edgePadding: {top: 40, bottom: 20, left: 20, right: 20},
       });
