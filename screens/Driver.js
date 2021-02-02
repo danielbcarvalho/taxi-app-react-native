@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+/* eslint-disable no-sparse-arrays */
+import React, { Component } from 'react'
 import {
   StyleSheet,
   View,
@@ -7,10 +8,10 @@ import {
   Linking,
   Platform,
   Alert,
-} from 'react-native';
-import MapView, {Polyline, Marker} from 'react-native-maps';
+} from 'react-native'
+import MapView, { Polyline, Marker } from 'react-native-maps';
 import BottomButton from '../components/BottomButton';
-import {io} from 'socket.io-client';
+import { io } from 'socket.io-client'
 import BackgroundGeolocation from '@mauron85/react-native-background-geolocation';
 
 export default class Driver extends Component {
@@ -18,7 +19,7 @@ export default class Driver extends Component {
     super(props);
     this.state = {
       lookingForPassengers: false,
-      buttonText: 'FIND PASSENGER',
+      buttonText: 'FIND PASSENGER'
     };
     this.lookForPassengers = this.lookForPassengers.bind(this);
     this.acceptPassengerRequest = this.acceptPassengerRequest.bind(this);
@@ -37,12 +38,12 @@ export default class Driver extends Component {
       interval: 10000,
       fastestInterval: 5000,
       activitiesInterval: 10000,
-      stopOnStillActivity: false,
+      stopOnStillActivity: false
     });
 
     BackgroundGeolocation.on('authorization', (status) => {
       console.log(
-        '[INFO] BackgroundGeolocation authorization status: ' + status,
+        '[INFO] BackgroundGeolocation authorization status: ' + status
       );
       if (status !== BackgroundGeolocation.AUTHORIZED) {
         // we need to set delay or otherwise alert may not be shown
@@ -54,17 +55,17 @@ export default class Driver extends Component {
               [
                 {
                   text: 'Yes',
-                  onPress: () => BackgroundGeolocation.showAppSettings(),
+                  onPress: () => BackgroundGeolocation.showAppSettings()
                 },
                 {
                   text: 'No',
                   onPress: () => console.log('No Pressed'),
-                  style: 'cancel',
+                  style: 'cancel'
                 },
                 ,
-              ],
+              ]
             ),
-          1000,
+          1000
         );
       }
     });
@@ -73,13 +74,13 @@ export default class Driver extends Component {
   async lookForPassengers() {
     if (this.state.lookingForPassengers) {
       this.setState({
-        lookingForPassengers: false,
+        lookingForPassengers: false
       });
       return;
     }
 
     this.setState({
-      lookingForPassengers: true,
+      lookingForPassengers: true
     });
 
     this.socket = io('http://192.168.10.101:3000/');
@@ -91,15 +92,15 @@ export default class Driver extends Component {
     this.socket.on('taxiRequest', async (routeResponse) => {
       console.log('L', routeResponse);
       await this.props.getRouteDirections(
-        routeResponse.geocoded_waypoints[0].place_id,
+        routeResponse.geocoded_waypoints[0].place_id
       );
       this.map.fitToCoordinates(this.props.pointCoords, {
-        edgePadding: {top: 20, bottom: 20, left: 80, right: 80},
+        edgePadding: { top: 20, bottom: 20, left: 80, right: 80 }
       });
       this.setState({
         lookingForPassengers: false,
         passengerFound: true,
-        buttonText: 'PASSENGER FOUND!',
+        buttonText: 'PASSENGER FOUND!'
       });
     });
   }
@@ -116,14 +117,14 @@ export default class Driver extends Component {
     BackgroundGeolocation.checkStatus((status) => {
       console.log(
         '[INFO] BackgroundGeolocation service is running',
-        status.isRunning,
-      );
+        status.isRunning
+      )
       console.log(
         '[INFO] BackgroundGeolocation services enabled',
-        status.locationServicesEnabled,
-      );
+        status.locationServicesEnabled
+      )
       console.log(
-        '[INFO] BackgroundGeolocation auth status: ' + status.authorization,
+        '[INFO] BackgroundGeolocation auth status: ' + status.authorization
       );
 
       // you don't need to check status before start (this is just the example)
@@ -137,17 +138,17 @@ export default class Driver extends Component {
       console.log('bgr acceptedride', location.latitude);
       this.socket.emit('driverLocation', {
         latitude: location.latitude,
-        longitude: location.longitude,
+        longitude: location.longitude
       });
     });
 
     if (Platform.OS === 'ios') {
       Linking.openURL(
-        `http://maps.apple.com/?daddr=${passengerLocation.latitude},${passengerLocation.longitude}`,
+        `http://maps.apple.com/?daddr=${passengerLocation.latitude},${passengerLocation.longitude}`
       );
     } else {
       Linking.openURL(
-        `geo:0,0?q=${passengerLocation.latitude},${passengerLocation.longitude}(Passenger)`,
+        `geo:0,0?q=${passengerLocation.latitude},${passengerLocation.longitude}(Passenger)`
       );
     }
   }
@@ -186,7 +187,7 @@ export default class Driver extends Component {
             this.props.pointCoords[this.props.pointCoords.length - 1]
           }>
           <Image
-            style={{width: 40, height: 40}}
+            style={{ width: 40, height: 40 }}
             source={require('../images/person-marker.png')}
           />
         </Marker>
@@ -204,7 +205,7 @@ export default class Driver extends Component {
             latitude: this.props.latitude,
             longitude: this.props.longitude,
             latitudeDelta: 0.015,
-            longitudeDelta: 0.0121,
+            longitudeDelta: 0.0121
           }}
           showsUserLocation={true}>
           <Polyline
@@ -234,11 +235,11 @@ const styles = StyleSheet.create({
     paddingLeft: 40,
     marginTop: 'auto',
     margin: 20,
-    alignSelf: 'center',
+    alignSelf: 'center'
   },
   bottomButtonText: {
     color: 'white',
-    fontSize: 20,
+    fontSize: 20
   },
   suggestions: {
     backgroundColor: 'white',
@@ -246,7 +247,7 @@ const styles = StyleSheet.create({
     padding: 5,
     borderWidth: 0.5,
     marginRight: 20,
-    marginLeft: 20,
+    marginLeft: 20
   },
   destinationInput: {
     height: 40,
@@ -255,9 +256,9 @@ const styles = StyleSheet.create({
     marginRight: 20,
     marginLeft: 20,
     padding: 5,
-    backgroundColor: 'white',
+    backgroundColor: 'white'
   },
   mapStyle: {
-    ...StyleSheet.absoluteFillObject,
-  },
+    ...StyleSheet.absoluteFillObject
+  }
 });

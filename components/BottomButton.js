@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
-import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
-import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import PropTypes from 'prop-types'
 
 export default class BottomButton extends Component {
   render() {
