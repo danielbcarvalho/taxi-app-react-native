@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Text, StyleSheet, View, Platform, Alert } from 'react-native';
+import { Text, StyleSheet, View, Platform, Alert, Image } from 'react-native';
 import LoginForm from '../components/LoginForm'
 import axios from 'axios'
 import LinearGradient from 'react-native-linear-gradient'
@@ -10,8 +10,8 @@ export default class Login extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            email: '',
-            password: '',
+            email: 'danielbcarvalho@gmail.com',
+            password: '321',
             errorMessage: ''
         }
         this.handleChange = this.handleChange.bind(this)
@@ -29,11 +29,11 @@ export default class Login extends Component {
         try {
             const { email, password } = this.state
             const result = await axios.post('/auth/signup', { email, password })
-            Alert.alert('', result.data)
 
-            //this.handleSignIn();
+            this.handleSignIn();
         } catch (error) {
-            console.log('=>>', error.response)
+            const errorMessage = error.response.data.message
+            Alert.alert('', errorMessage)
         }
     }
 
@@ -42,7 +42,8 @@ export default class Login extends Component {
             const { email, password } = this.state
             const result = await axios.post('/auth/login', { email, password })
             if (result.data.token) {
-                Alert.alert('', result.data.token)
+                //Alert.alert('', result.data.token)
+                this.props.handleChange('token', result.data.token)
             } else {
                 Alert.alert('', result.data)
             }
@@ -60,7 +61,7 @@ export default class Login extends Component {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
             >
-                <Text style={styles.headerText}> wetaxi </Text>
+                <Text style={styles.headerText}>WeTaxi </Text>
                 <LoginForm
                     email={this.state.email}
                     password={this.state.password}
@@ -69,6 +70,11 @@ export default class Login extends Component {
                     handleSignUp={this.handleSignUp}
                 />
                 <Text>{this.state.errorMessage}</Text>
+                <Image
+                    source={require('../images/wetaxi.png')}
+                    style={styles.logo}
+                />
+
             </LinearGradient>
         )
     }
@@ -82,12 +88,19 @@ const styles = StyleSheet.create({
         fontSize: 64,
         color: '#FFF',
         textAlign: 'center',
-        marginTop: 150,
+        marginTop: 180,
         marginBottom: 40
     },
     errorMessage: {
         marginHorizontal: 10,
         fontSize: 18,
         color: '#fff'
+    },
+    logo: {
+        //flex: 1,
+        marginTop: 100,
+        height: 100,
+        width: 100,
+        alignSelf: 'center',
     }
 });

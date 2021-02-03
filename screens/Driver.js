@@ -90,7 +90,6 @@ export default class Driver extends Component {
     });
 
     this.socket.on('taxiRequest', async (routeResponse) => {
-      console.log('L', routeResponse);
       await this.props.getRouteDirections(
         routeResponse.geocoded_waypoints[0].place_id
       );
@@ -109,8 +108,6 @@ export default class Driver extends Component {
     const passengerLocation = this.props.pointCoords[
       this.props.pointCoords.length - 1
     ];
-    console.log('acceppassen', passengerLocation);
-
     // this.setState({
     //   lookingForPassengers: false,
     // });
@@ -135,7 +132,6 @@ export default class Driver extends Component {
     });
     BackgroundGeolocation.on('location', (location) => {
       //Send driver location to paseenger socket io backend
-      console.log('bgr acceptedride', location.latitude);
       this.socket.emit('driverLocation', {
         latitude: location.latitude,
         longitude: location.longitude
