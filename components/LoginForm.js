@@ -11,7 +11,9 @@ export default class LoginForm extends Component {
                     keyboardType='email-address'
                     autoCapitalize='none'
                     autoCorrect={false}
-                    placeholderTextColor='#3A3743'
+                    placeholderTextColor='#D1D1D1'
+                    value={this.props.email}
+                    onChangeText={(email) => this.props.handleChange('email', email)}
                 />
                 <TextInput
                     style={styles.input}
@@ -19,10 +21,22 @@ export default class LoginForm extends Component {
                     autoCorrect={false}
                     secureTextEntry
                     placeholder='password'
-                    placeholderTextColor='#3A3743'
+                    placeholderTextColor='#D7D7D7'
+                    value={this.props.password}
+                    onChangeText={(password) => this.props.handleChange('password', password)}
                 />
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={this.props.handleSignIn}
+                >
                     <Text style={styles.buttonText}>Sign in</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.create}
+                    onPress={this.props.handleSignUp}
+
+                >
+                    <Text style={styles.create}>Create account</Text>
                 </TouchableOpacity>
             </View>
         )
@@ -32,18 +46,36 @@ export default class LoginForm extends Component {
 const styles = StyleSheet.create({
     input: {
         height: 40,
-        padding: 10,
+        padding: 5,
         marginBottom: 10,
-        backgroundColor: '#fff',
-        color: '#3A3743',
-        textAlign: 'center'
+        marginRight: 30,
+        marginLeft: 30,
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        color: '#fff',
+        textAlign: 'center',
+        fontSize: 17,
+        borderRadius: 20
     },
     button: {
+        borderRadius: 20,
         backgroundColor: '#562EAC',
-        paddingVertical: 20
+        paddingVertical: 10,
+        marginVertical: 10,
+        marginRight: 30,
+        marginLeft: 30,
+
     },
     buttonText: {
         textAlign: 'center',
-        fontSize: 20,
+        fontSize: 25,
+        fontFamily: Platform.OS === 'android' ? 'sans-serif-light' : undefined,
+        fontWeight: '200',
+    },
+    create: {
+        color: '#fff',
+        textAlign: 'center',
+        fontSize: 25,
+        fontFamily: Platform.OS === 'android' ? 'sans-serif-light' : undefined,
+        fontWeight: '200',
     }
 })
