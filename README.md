@@ -10,18 +10,12 @@ It uses a [Socket.io Server here](https://github.com/daniel30-07/taxi-app-socket
 * Taxi Driver will receive Passenger's location and trace the route, choosing to accept the ride and going to Navigation
 * If a Taxi Driver accept the ride, the Passenger receives a notification and Driver's background location to watch the trip.
 
-
-![Screenshot](./images/readme/taxiApp3.png "Screenshot")
-<!-- [YelpCamp Website](https://enigmatic-sea-52160.herokuapp.com/) -->
-
 ## Tech/framework used
 * React-native
 * Express
 * Socket.io
 * Mongodb
 * Google Maps Api
-
-![Screenshot](./images/readme/taxiApp4.png "Screenshot")
 
 ## Installation - yarn
 ### Prerequisites
@@ -86,4 +80,7 @@ Connect with me at [LinkedIn](https://www.linkedin.com/in/daniel-carvalho-0a4916
 
 Thank you!
 
+![Screenshot](./images/readme/taxiApp3.png "Screenshot")
+
+![Screenshot](./images/readme/taxiApp4.png "Screenshot")
 
