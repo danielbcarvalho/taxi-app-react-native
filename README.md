@@ -2,7 +2,7 @@
 # WeTaxi
 A React-Native App that links Taxi Drivers and Passengers. 
 
-It uses a [Socket.io Server here](https://github.com/daniel30-07/taxi-app-socket.io) to connect Driver and Passenger in real time. It also uses a REST API [Express Backend](https://github.com/daniel30-07/taxi-app-express-backend.git) for login, sign up, authentication and controlling routes inside the App.   
+It uses a [Socket.io Server](https://github.com/daniel30-07/taxi-app-socket.io) to connect Driver and Passenger in real time. It also uses a REST API [Express Backend](https://github.com/daniel30-07/taxi-app-express-backend.git) for login, sign up, authentication and controlling routes inside the App.   
 
 ## Functionalities
 * Sign up / Login / Authentication
