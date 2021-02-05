@@ -1,4 +1,4 @@
-![Screenshot](./images/readme/Login.png "Screenshot")
+![Screenshot](./images/readme/Login.png | width=200 "Screenshot")
 # WeTaxi
 A React-Native App that links Taxi Drivers and Passengers.
 
@@ -10,7 +10,7 @@ A React-Native App that links Taxi Drivers and Passengers.
 
 
 Type a location on the search box and the app will determine and trace the route on the google map.
-![Screenshot](./images/readme/Driver App.png  "Screenshot")
+![Screenshot](./images/readme/Driver_App.png | width=200 "Screenshot")
 <!-- [YelpCamp Website](https://enigmatic-sea-52160.herokuapp.com/) -->
 
 ## Tech/framework used
@@ -20,7 +20,7 @@ Type a location on the search box and the app will determine and trace the route
 * Mongodb
 * Google Maps Api
 
-![Screenshot](./images/readme/SignUp.png  "Screenshot")
+![Screenshot](./images/readme/SignUp.png  | width=200 "Screenshot")
 
 ## Installation - yarn
 ### Prerequisites
@@ -31,13 +31,17 @@ Also, you'll need to the server running locally on your machine with the mock da
 ### Installing
 Cloning the Repository
 
+```
 $ git clone https://github.com/daniel30-07/taxi-app-react-native.git
+```
 
+```
 $ yarn
-
+```
 or
-
+```
 $ npm install
+```
 
 Connecting the App with the Server
 1 - Follow the instructions on the taxi-app-socket.io and taxi-app-express to have the server running on your machine.
@@ -48,9 +52,10 @@ Connecting the App with the Server
 With all dependencies installed and the environment properly configured, you can now run the app:
 
 Android
-
+```
 $ yarn android
-
+```
 iOS
-
+```
 $ yarn ios
+```
