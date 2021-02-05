@@ -5,6 +5,7 @@ import Passenger from './screens/Passenger'
 import Login from './screens/Login'
 import GenericContainer from './components/GenericContainer'
 import DriverOrPassenger from './screens/DriverOrPassenger'
+import SignUp from './screens/SignUp'
 
 const DriverWithGenericContainer = GenericContainer(Driver)
 const PassengerWithGenericContainer = GenericContainer(Passenger)
@@ -15,6 +16,7 @@ export default class App extends Component {
       isDriver: false,
       isPassenger: false,
       token: '',
+      createAccount: false
     }
     this.handleChange = this.handleChange.bind(this)
   }
@@ -24,6 +26,10 @@ export default class App extends Component {
   }
 
   render() {
+
+    if (this.state.createAccount) {
+      return <SignUp handleChange={this.handleChange} />
+    }
 
     if (this.state.token === '') {
       return <Login handleChange={this.handleChange} />

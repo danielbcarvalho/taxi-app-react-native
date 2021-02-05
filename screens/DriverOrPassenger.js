@@ -8,7 +8,7 @@ export default class DriverOrPassenger extends Component {
         const onPressDriver = () => this.props.handleChange('isDriver', true)
         return (
             <LinearGradient
-                colors={['#7D54DF', '#9C55BB']}
+                colors={['#5C55BB', '#9D54DF']}
                 style={styles.container}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}

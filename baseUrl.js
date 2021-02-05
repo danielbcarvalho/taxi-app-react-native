@@ -1,3 +1,5 @@
-const baseURL = 'http://192.168.10.103:4000'
+const baseURL = 'http://192.168.10.101:4000'
+const socketIoURL = 'http://192.168.10.101:3000/'
 
-module.exports = baseURL
+exports.socketIoURL = socketIoURL
+exports.baseURL = baseURL

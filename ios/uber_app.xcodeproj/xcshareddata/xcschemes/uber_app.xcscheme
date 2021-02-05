@@ -61,7 +61,7 @@
          </BuildableReference>
       </BuildableProductRunnable>
       <LocationScenarioReference
-         identifier = "../../../../../Downloads/testrouteIOS.gpx"
+         identifier = "../../../../../Downloads/gpxRioGrandedoSul.gpx"
          referenceType = "0">
       </LocationScenarioReference>
    </LaunchAction>

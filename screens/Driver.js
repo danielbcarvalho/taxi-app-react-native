@@ -13,7 +13,7 @@ import MapView, { Polyline, Marker } from 'react-native-maps';
 import BottomButton from '../components/BottomButton';
 import { io } from 'socket.io-client'
 import BackgroundGeolocation from '@mauron85/react-native-background-geolocation';
-
+import { socketIoURL } from '../baseUrl'
 export default class Driver extends Component {
   constructor(props) {
     super(props);
@@ -80,10 +80,11 @@ export default class Driver extends Component {
     }
 
     this.setState({
-      lookingForPassengers: true
+      lookingForPassengers: true,
+      buttonText: 'FINDING PASSENGERS'
     });
 
-    this.socket = io('http://192.168.10.101:3000/');
+    this.socket = io(socketIoURL);
 
     this.socket.on('connect', () => {
       this.socket.emit('lookingForPassengers');
@@ -97,9 +98,9 @@ export default class Driver extends Component {
         edgePadding: { top: 20, bottom: 20, left: 80, right: 80 }
       });
       this.setState({
+        buttonText: 'PASSENGER FOUND! PRESS TO ACCEPT',
         lookingForPassengers: false,
         passengerFound: true,
-        buttonText: 'PASSENGER FOUND!'
       });
     });
   }
@@ -153,7 +154,6 @@ export default class Driver extends Component {
     let endMarker = null;
     let startMarker = null;
     let findingPassengerActIndicator = null;
-    let passengerSearchText = 'FIND PASSENGER';
     let bottomButtonFunction = this.lookForPassengers;
 
     if (this.props.latitude === null) {
@@ -161,7 +161,6 @@ export default class Driver extends Component {
     }
 
     if (this.state.lookingForPassengers) {
-      passengerSearchText = 'FINDING PASSENGERS...';
       findingPassengerActIndicator = (
         <ActivityIndicator
           size="large"
@@ -172,7 +171,7 @@ export default class Driver extends Component {
     }
 
     if (this.state.passengerFound) {
-      passengerSearchText = 'FOUND PASSENGER! ACCEPT RIDE?';
+      //passengerSearchText = 'FOUND PASSENGER! PRESS TO ACCEPT RIDE?';
       bottomButtonFunction = this.acceptPassengerRequest;
     }
 
@@ -215,7 +214,7 @@ export default class Driver extends Component {
 
         <BottomButton
           onPressFunction={bottomButtonFunction}
-          buttonText={passengerSearchText}>
+          buttonText={this.state.buttonText}>
           {findingPassengerActIndicator}
         </BottomButton>
       </View>

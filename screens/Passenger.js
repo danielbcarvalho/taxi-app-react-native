@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
   TextInput,
   StyleSheet,
@@ -8,11 +8,11 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import MapView, {Polyline, Marker} from 'react-native-maps';
+import MapView, { Polyline, Marker } from 'react-native-maps';
 import apiKey from '../google_api_key';
-import {io} from 'socket.io-client';
+import { io } from 'socket.io-client';
 import BottomButton from '../components/BottomButton';
-
+import { baseURL, socketIoURL } from '../baseUrl';
 export default class Passenger extends Component {
   constructor(props) {
     super(props);
@@ -39,12 +39,11 @@ export default class Passenger extends Component {
   }
 
   async resquestDriver() {
-    this.setState({lookingForDriver: true});
+    this.setState({ lookingForDriver: true });
 
-    const socket = io('http://192.168.10.101:3000/');
+    const socket = io(socketIoURL);
 
     socket.on('connect', () => {
-      console.log('L', 'client connected');
       //Request a Taxi!
       socket.emit('taxiRequest', this.props.routeResponse);
     });
@@ -54,12 +53,12 @@ export default class Passenger extends Component {
       console.log('socketon driverlocation', pointCoords);
       console.log('driverLoc', driverLocation);
       this.map.fitToCoordinates(pointCoords, {
-        edgePadding: {top: 40, bottom: 20, left: 20, right: 20},
+        edgePadding: { top: 40, bottom: 20, left: 20, right: 20 },
       });
       //this.getRouteDirections(routeResponse.geocoded_waypoints[0].place_id);
       this.setState({
-        buttonText: 'TAXI ACCEPTED THE RIDE!',
-        //lookingForDriver: false,
+        buttonText: 'TAXI IS ON THE WAY!',
+        lookingForDriver: false,
         driverIsOnTheWar: true,
         driverLocation,
       });
@@ -81,7 +80,7 @@ export default class Passenger extends Component {
         <Marker coordinate={this.state.driverLocation}>
           <Image
             source={require('../images/carIcon.png')}
-            style={{width: 40, height: 40}}
+            style={{ width: 40, height: 40 }}
           />
         </Marker>
       );
@@ -118,9 +117,9 @@ export default class Passenger extends Component {
             prediction.place_id,
             prediction.structured_formatting.main_text,
           );
-          this.setState({predictions: [], destination: destinationName});
+          this.setState({ predictions: [], destination: destinationName });
           this.map.fitToCoordinates(this.props.pointCoords, {
-            edgePadding: {top: 20, bottom: 20, left: 80, right: 80},
+            edgePadding: { top: 20, bottom: 20, left: 80, right: 80 },
           });
         }}
         key={prediction.place_id}>

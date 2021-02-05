@@ -1,21 +1,23 @@
 import React, { Component } from 'react'
-import { Text, StyleSheet, Alert, Image } from 'react-native';
-import LoginForm from '../components/LoginForm'
+import { Text, StyleSheet, View, Platform, Alert, Image } from 'react-native'
+import SignUpForm from '../components/SignUpForm'
+import Login from './Login'
 import axios from 'axios'
 import LinearGradient from 'react-native-linear-gradient'
 import { baseURL } from '../baseUrl'
 axios.defaults.baseURL = baseURL
 
-export default class Login extends Component {
+export default class SignUp extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            email: 'danielbcarvalho@gmail.com',
-            password: '321',
+            email: '',
+            password: '',
+            firstName: '',
+            lastName: '',
             errorMessage: ''
         }
         this.handleChange = this.handleChange.bind(this)
-        this.handleSignIn = this.handleSignIn.bind(this)
         this.handleSignUp = this.handleSignUp.bind(this)
     }
 
@@ -26,39 +28,31 @@ export default class Login extends Component {
     }
 
     async handleSignUp() {
-        console.log('SignUpForm')
-        this.props.handleChange('createAccount', true)
-    }
-
-    async handleSignIn() {
         try {
-            const { email, password } = this.state
-            const result = await axios.post('/auth/login', { email, password })
-            if (result.data.token) {
-                this.props.handleChange('token', result.data.token)
-            } else {
-                Alert.alert('', result.data)
-            }
-
+            const { firstName, lastName, email, password } = this.state
+            const result = await axios.post('/auth/signup', { firstName, lastName, email, password })
+            this.props.handleChange('createAccount', false)
         } catch (error) {
-            console.log(error)
+            const errorMessage = error.response.data.message
+            Alert.alert('', errorMessage)
         }
     }
 
     render() {
         return (
             <LinearGradient
-                colors={['#4D54DF', '#9C55BB']}
+                colors={['#1C55BB', '#9999DF']}
                 style={styles.container}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
             >
                 <Text style={styles.headerText}>WeTaxi </Text>
-                <LoginForm
+                <SignUpForm
+                    firstName={this.state.firstName}
+                    lastName={this.state.lastName}
                     email={this.state.email}
                     password={this.state.password}
                     handleChange={this.handleChange}
-                    handleSignIn={this.handleSignIn}
                     handleSignUp={this.handleSignUp}
                 />
                 <Text>{this.state.errorMessage}</Text>

@@ -1,16 +1,35 @@
 import React, { Component } from 'react'
 import { Text, StyleSheet, View, TextInput, TouchableOpacity } from 'react-native'
-export default class LoginForm extends Component {
+
+export default class SignUpForm extends Component {
     render() {
         return (
             <View>
+                <TextInput
+                    style={styles.input}
+                    placeholder='First Name'
+                    autoCapitalize={'words'}
+                    autoCorrect={false}
+                    placeholderTextColor='grey'
+                    value={this.props.firstName}
+                    onChangeText={(firstName) => this.props.handleChange('firstName', firstName)}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder='Last Name'
+                    autoCapitalize={'words'}
+                    autoCorrect={false}
+                    placeholderTextColor='grey'
+                    value={this.props.lastName}
+                    onChangeText={(lastName) => this.props.handleChange('lastName', lastName)}
+                />
                 <TextInput
                     style={styles.input}
                     placeholder='your@email.com'
                     keyboardType='email-address'
                     autoCapitalize='none'
                     autoCorrect={false}
-                    placeholderTextColor='#D1D1D1'
+                    placeholderTextColor='grey'
                     value={this.props.email}
                     onChangeText={(email) => this.props.handleChange('email', email)}
                 />
@@ -20,21 +39,22 @@ export default class LoginForm extends Component {
                     autoCorrect={false}
                     secureTextEntry
                     placeholder='password'
-                    placeholderTextColor='#D7D7D7'
+                    placeholderTextColor='grey'
                     value={this.props.password}
                     onChangeText={(password) => this.props.handleChange('password', password)}
                 />
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={this.props.handleSignIn}
+                    onPress={this.props.handleSignUp}
                 >
-                    <Text style={styles.buttonText}>Sign in</Text>
+                    <Text style={styles.buttonText}>Create account</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={styles.create}
                     onPress={this.props.handleSignUp}
+
                 >
-                    <Text style={styles.create}>Create account</Text>
+                    <Text style={styles.create}>I have an account</Text>
                 </TouchableOpacity>
             </View>
         )
@@ -48,8 +68,8 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         marginRight: 30,
         marginLeft: 30,
-        backgroundColor: 'rgba(0,0,0,0.2)',
-        color: '#fff',
+        backgroundColor: 'white',
+        color: 'black',
         textAlign: 'center',
         fontSize: 17,
         borderRadius: 20
@@ -64,13 +84,14 @@ const styles = StyleSheet.create({
 
     },
     buttonText: {
+        color: 'white',
         textAlign: 'center',
         fontSize: 25,
         fontFamily: Platform.OS === 'android' ? 'sans-serif-light' : undefined,
         fontWeight: '200',
     },
     create: {
-        color: '#fff',
+        color: 'black',
         textAlign: 'center',
         fontSize: 25,
         fontFamily: Platform.OS === 'android' ? 'sans-serif-light' : undefined,
