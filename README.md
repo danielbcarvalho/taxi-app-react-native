@@ -38,22 +38,47 @@ or
 $ npm install
 ```
 
-### Connecting the App with Server
+#### For IOS development
+
+```
+sudo gem install cocoapods
+
+cd ios && pod install
+```
+
+#### For ANDROID develpment
+
+Go to file:
+/node_modules/@mauron85/react-native-background-geolocation/android/common/gradle.properties
+And set:
+```
+android.enableUnitTestBinaryResources=false
+```
+from terminal
+```
+npx jetify
+```
+
+## Running
+With all dependencies installed and the environment properly configured, you can now run the app.
+
+* For the first time, run the app on Xcode or Android Studio and after that:
+
+#### Android
+```
+$ yarn android
+```
+#### iOS
+```
+$ yarn ios
+```
+
+## Connecting the App with Servers
+
 1 - Follow the instructions on the taxi-app-socket.io and taxi-app-express to have the server running on your machine.
 
 2 - With the server up and running, go to the ./baseUrl.js file and edit the value of the field baseURL and socketIoURL with the IP of your machine.
 
-### Running
-With all dependencies installed and the environment properly configured, you can now run the app:
-
-Android
-```
-$ yarn android
-```
-iOS
-```
-$ yarn ios
-```
 
 ## Built With
 
