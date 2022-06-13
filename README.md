@@ -1,8 +1,19 @@
 ![Screenshot](./images/readme/taxiApp1.png "Screenshot")
-# WeTaxi
-A React-Native App that links Taxi Drivers and Passengers. 
+# WeTaxi 
+A React-Native App that links Taxi Drivers and Passengers. It was built for studies purposes... 
 
-It uses a [Socket.io Server](https://github.com/daniel30-07/taxi-app-socket.io) to connect Driver and Passenger in real time. It also uses a REST API [Express Backend](https://github.com/daniel30-07/taxi-app-express-backend.git) for login, sign up, authentication and controlling routes inside the App.   
+
+It uses a [Socket.io Server](https://github.com/daniel30-07/taxi-app-socket.io) to connect Driver and Passenger in real time. It also uses a REST API [Express Backend](https://github.com/daniel30-07/taxi-app-express-backend.git) for login, sign up, authentication and controlling routes inside the App.  
+
+video of the application running:
+https://streamable.com/jb8wyo
+
+<em>Due to recent background location permissions change on Android, the app is working properly on IOS only.
+
+If you want to implement it on android, you must make adjustments and request background permission directly with Google Developer:</em>
+https://support.google.com/googleplay/android-developer/answer/9799150?hl=en
+
+ 
 
 ## Functionalities
 * Sign up / Login / Authentication
